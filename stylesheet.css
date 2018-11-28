@@ -4,23 +4,45 @@ body, html {
     background-color: white;
 }
 
+a {
+    color: black;
+}
+
+a:hover {
+    color: black;
+}
+
+.headerLink:hover {
+    background-color: transparent;
+    text-decoration: none;
+}
+
 #navbar {
     list-style-type: none;
-    position: absolute;
+    position: fixed;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-evenly;
     margin: 0;
     padding: 0;
     width: 15%;
     height: 100%;
+    overflow: auto;
     background-color: black;
+}
+
+ a:hover {
+    background-color: #191919;
 }
 
 #navbar a {
     display: block;
     color: white;
+    font-size: 20px;
     text-decoration: none;
-    padding-left: 10px;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-left: 30px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 #page-wrapper {
