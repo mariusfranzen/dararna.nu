@@ -1,0 +1,44 @@
+body, html {
+    margin: 0 auto;
+    padding: 0;
+    background-color: white;
+}
+
+#navbar {
+    list-style-type: none;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    width: 15%;
+    height: 100%;
+    background-color: black;
+}
+
+#navbar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding-left: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+#page-wrapper {
+    position: absolute;
+    height: auto;
+    min-height: 100%;
+    width: 85%;
+    right: 0px;
+}
+
+.section {
+    margin: 0 auto;
+    width: 80%;
+    left: 10%;
+    right: 10%;
+}
+
+.col-1-5 {
+    width: 20%;
+    height: auto;
+}
