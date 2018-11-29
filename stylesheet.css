@@ -23,6 +23,11 @@ p {
     text-decoration: none;
 }
 
+.headerLink {
+    position: relative;
+    left: 0;
+}
+
 #navbar {
     list-style-type: none;
     position: fixed;
@@ -73,7 +78,6 @@ p {
 .text {
     position: relative;
     padding: 10px;
-    margin-bottom: 25px;
 }
 
 #footer {
@@ -100,6 +104,12 @@ p {
 
 .right {
     float: right;
+}
+
+.row {
+    width: 100%;
+    margin: 0;
+    height: auto;
 }
 
 .col-1-2 {
