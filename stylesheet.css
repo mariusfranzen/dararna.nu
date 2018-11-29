@@ -121,3 +121,16 @@ p {
     width: 20%;
     height: auto;
 }
+
+@media screen and (max-width:800px) {
+    #navbar{
+        width: 100%;
+        position: relative;
+    }
+    .col-1-2 {
+        width: 100%;
+    }
+    #page-wrapper{
+        width: 100%;
+    }
+}
