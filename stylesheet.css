@@ -2,6 +2,8 @@ body, html {
     margin: 0 auto;
     padding: 0;
     background-color: white;
+    height: 100%;
+    width: 100%;
 }
 
 a {
@@ -10,6 +12,10 @@ a {
 
 a:hover {
     color: black;
+}
+
+p {
+    margin: 0;
 }
 
 .headerLink:hover {
@@ -53,11 +59,33 @@ a:hover {
     right: 0px;
 }
 
+.headerImg {
+    position: relative;
+    width: 100%;
+    right: 0;
+}
+
+.text {
+    position: relative;
+}
+
+#footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #191919;
+    color: white;
+    text-align: center;
+}
+
 .section {
     margin: 0 auto;
     width: 80%;
     left: 10%;
     right: 10%;
+    margin-bottom: 25px;
+    font-size: 18px;
 }
 
 .col-1-5 {
