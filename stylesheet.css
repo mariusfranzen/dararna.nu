@@ -59,6 +59,11 @@ p {
     right: 0px;
 }
 
+#profilePic {
+    width: 35%;
+    padding-right: 15px; 
+}
+
 .headerImg {
     position: relative;
     width: 100%;
@@ -67,6 +72,8 @@ p {
 
 .text {
     position: relative;
+    padding: 10px;
+    margin-bottom: 25px;
 }
 
 #footer {
@@ -84,8 +91,20 @@ p {
     width: 80%;
     left: 10%;
     right: 10%;
-    margin-bottom: 25px;
     font-size: 18px;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.col-1-2 {
+    width: 50%;
+    height: auto;
 }
 
 .col-1-5 {
