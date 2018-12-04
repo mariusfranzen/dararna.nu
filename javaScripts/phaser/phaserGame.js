@@ -36,6 +36,9 @@ function preload() {
   //Loads a spritesheet that consists of 3 frames, and each frame takes up 20 x 20 px
   game.load.spritesheet("ball", "media/phaserGame/wobble.png", 20, 20);
   game.load.spritesheet("button", "media/phaserGame/startbutton.png", 120, 40);
+  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+  game.scale.pageAlignHorizontally = true;
+  game.scale.pageAlignVertically = true;
 }
 
 function create() {
