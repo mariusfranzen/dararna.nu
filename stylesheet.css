@@ -32,6 +32,8 @@ a {
 
 a:hover {
     color: black;
+    background-color: transparent;
+    text-decoration: none;
 }
 
 p {
@@ -99,6 +101,12 @@ a:hover {
 .text {
     position: relative;
     padding: 10px;
+}
+
+.box {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 5px;
+    padding: 15px;
 }
 
 #cvProgramming{
@@ -241,6 +249,17 @@ a:hover {
 
 #phaserGame>canvas {
     margin: 0 auto;
+}
+
+.gameLinkArea {
+    position: relative;
+    width: 70px;
+    margin: 15px;
+}
+
+.gameLink {
+    position: relative;
+    width: 70px;
 }
 
 /*
