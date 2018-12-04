@@ -7,6 +7,25 @@ html {
     width: 100%;
 }
 
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    box-shadow: inset 0 0 5px grey; 
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 25px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+
 a {
     color: black;
 }
@@ -17,6 +36,7 @@ a:hover {
 
 p {
     margin: 0;
+    font-size: 16px;
 }
 
 .headerLink:hover {
@@ -81,6 +101,23 @@ a:hover {
     padding: 10px;
 }
 
+#cvProgramming{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 5px;
+    padding: 15px;
+    padding-top: 0px;
+}
+
+#cvRightCol{
+    width: 66%;
+    float: right;
+    height: auto;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 5px;
+    padding: 15px;
+    padding-top: 0px;
+}
+
 #footer {
     position: fixed;
     left: 0;
@@ -95,12 +132,64 @@ a:hover {
     width: 2.5%;
 }
 
+#htmlImg{
+    width: 60px;
+}
+
+.programmingImg{
+    width: 20px;
+}
+
 .section {
     margin: 0 auto;
     width: 80%;
     left: 10%;
     right: 10%;
     font-size: 18px;
+}
+
+.barBackground{
+    position: relative;
+    margin: 10px 0px 10px 0px;
+    width: 100%;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 25px;
+}
+
+.barForeground{
+    position: relative;
+    height: 20px;
+    background-color: green;
+    border-radius: 25px;
+}
+
+.barPercentage{
+    position: relative;
+    top: -1px;
+    text-align: center; 
+    vertical-align: middle; 
+    color: white;
+}
+
+#javaBar {
+    width: 80%;
+}
+
+#cppBar {
+    width: 60%;
+}
+
+#htmlBar{
+    width: 50%;
+}
+
+.workplace{
+    font-weight: bold;
+}
+
+.workdate{
+    color: green;
 }
 
 .left {

@@ -151,8 +151,6 @@ function ballHitBrick(ball, brick) {
     alert("You won the game! Congratulations!\nYour score is: " + score);
     location.reload();
   }
-
-  console.log(countAlive);
 }
 
 function ballLeaveScreen() {
