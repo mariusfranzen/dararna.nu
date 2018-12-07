@@ -109,7 +109,7 @@ a:hover {
     padding: 15px;
 }
 
-#cvProgramming{
+.boxShadow{
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 5px;
     padding: 15px;
@@ -117,13 +117,18 @@ a:hover {
 }
 
 #cvRightCol{
-    width: 66%;
+    width: 65%;
     float: right;
     height: auto;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-radius: 5px;
-    padding: 15px;
-    padding-top: 0px;
+}
+
+#cvEducation{
+    width: 100%;
+    margin-top: 25px;
+}
+
+#cvProgrammingLanguages{
+    width: 100%;
 }
 
 #footer {
@@ -294,6 +299,10 @@ a:hover {
 
     #cvRightCol {
         width: 100%;
+        margin-top: 25px;
+    }
+
+    #cvEducation{
         margin-top: 25px;
     }
 }
