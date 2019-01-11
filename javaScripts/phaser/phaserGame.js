@@ -1,5 +1,5 @@
 /*
- * BREAKOUT made by Marius Franzén using Phaser - marius.franzen@jgy.se
+ * BREAKOUT made by Marius Franzén using Phaser - marius.franzen1@gmail.com
  */
 
 //Creates game canvas
