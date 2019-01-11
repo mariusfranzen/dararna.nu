@@ -76,6 +76,11 @@ function update() {
             fire();
         }
     }
+
+    game.physics.arcade.collide(lasers, invaders1, laserHitInvader1);
+    game.physics.arcade.collide(lasers, invaders2, laserHitInvader2);
+    game.physics.arcade.collide(lasers, invaders3, laserHitInvader3);
+
 }
 
 function spawnInvader1() {
@@ -89,7 +94,7 @@ function spawnInvader1() {
         },
         offset: {
             top: 150,
-            left: 100
+            left: 120
         },
         padding: 10
     }
@@ -102,6 +107,9 @@ function spawnInvader1() {
             var invader1Y = (c * (invader1Info.height + invader1Info.padding)) + invader1Info.offset.top;
 
             newInvader1 = game.add.sprite(invader1X, invader1Y, "invader1");
+            game.physics.enable(newInvader1, Phaser.Physics.ARCADE);
+            newInvader1.anchor.set(0.5);
+            invaders1.add(newInvader1);
 
         }
     }
@@ -119,7 +127,7 @@ function spawnInvader2() {
         },
         offset: {
             top: 220,
-            left: 100
+            left: 120
         },
         padding: 10
     }
@@ -132,6 +140,9 @@ function spawnInvader2() {
             var invader2Y = (c * (invader2Info.height + invader2Info.padding)) + invader2Info.offset.top;
 
             newInvader2 = game.add.sprite(invader2X, invader2Y, "invader2");
+            game.physics.enable(newInvader2, Phaser.Physics.ARCADE);
+            newInvader2.anchor.set(0.5);
+            invaders2.add(newInvader2);
 
         }
     }
@@ -149,7 +160,7 @@ function spawnInvader3() {
         },
         offset: {
             top: 115,
-            left: 100
+            left: 115.5
         },
         padding: 21.9
     }
@@ -162,6 +173,9 @@ function spawnInvader3() {
             var invader3Y = (c * (invader3Info.height + invader3Info.padding)) + invader3Info.offset.top;
 
             newInvader3 = game.add.sprite(invader3X, invader3Y, "invader3");
+            game.physics.enable(newInvader3, Phaser.Physics.ARCADE);
+            newInvader3.anchor.set(0.5);
+            invaders3.add(newInvader3);
 
         }
     }
@@ -172,13 +186,28 @@ function spawnUfo() {
 
 }
 
+function laserHitInvader1(laser, invader1){
+    laser.kill();
+    invader1.kill();
+}
+
+function laserHitInvader2(laser, invader2){
+    laser.kill();
+    invader2.kill();
+}
+
+function laserHitInvader3(laser, invader3){
+    laser.kill();
+    invader3.kill();
+}
+
 function fire() {
     if (game.time.now > laserTime) {
         laser = lasers.getFirstExists(false);
         if (laser) {
             laser.reset(player.x - 1, player.y - 11);
             laser.body.velocity.y = -300;
-            laserTime = game.time.now + 550;
+            laserTime = game.time.now + 1300;
         }
     }
 }
