@@ -17,9 +17,16 @@ var lasers;
 
 var invader1Info;
 var invaders1;
+var invaders2;
+var invaders3;
+
 var newInvader1;
+var newInvader2;
+var newInvader3;
 
 var playing = true;
+
+const padding = 10;
 
 function preload() {
     game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
@@ -57,10 +64,7 @@ function create() {
         l.checkWorldBounds = true;
         l.events.onOutOfBounds.add(resetLaser, this);
     }
-    //spawns invaders
-    spawnInvader1();
-    spawnInvader2();
-    spawnInvader3();
+    spawnInvaders();
 }
 
 function update() {
@@ -83,7 +87,7 @@ function update() {
 
 }
 
-function spawnInvader1() {
+function spawnInvader1(enemyType, eWidth, eHeight) {
     //Invader info (self explainatory)
     invader1Info = {
         width: 38,
@@ -96,17 +100,48 @@ function spawnInvader1() {
             top: 150,
             left: 120
         },
+        padding: padding
+    }
+
+    invader2Info = {
+        width: 38,
+        height: 24,
+        count: {
+            row: 11,
+            col: 2
+        },
+        offset: {
+            top: 220,
+            left: 120
+        },
         padding: 10
+    }
+
+    invader3Info = {
+        width: 27,
+        height: 24,
+        count: {
+            row: 11,
+            col: 1
+        },
+        offset: {
+            top: 115,
+            left: 115.5
+        },
+        padding: 21.9
     }
     //spawns the invaders
     invaders1 = game.add.group();
+    invaders2 = game.add.group();
+    invaders3 = game.add.group();
+
     for (c = 0; c < invader1Info.count.col; c++) {
         for (r = 0; r < invader1Info.count.row; r++) {
 
             var invader1X = (r * (invader1Info.width + invader1Info.padding)) + invader1Info.offset.left;
             var invader1Y = (c * (invader1Info.height + invader1Info.padding)) + invader1Info.offset.top;
 
-            newInvader1 = game.add.sprite(invader1X, invader1Y, "invader1");
+            newInvader1 = game.add.sprite(invader1X, invader1Y, "invader" + enemyType);
             game.physics.enable(newInvader1, Phaser.Physics.ARCADE);
             newInvader1.anchor.set(0.5);
             invaders1.add(newInvader1);
