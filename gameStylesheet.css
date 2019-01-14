@@ -1,3 +1,9 @@
+@font-face { 
+    font-family: "Pixeled";
+     src: url("media/Pixeled.ttf");
+     src: local("Pixeled"), url("media/Pixeled.ttf");
+ }
+
 body,
 html {
     margin: 0 auto;
