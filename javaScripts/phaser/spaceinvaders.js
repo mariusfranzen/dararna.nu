@@ -24,13 +24,13 @@ var laser;
 var laserTime = 0;
 var lasers;
 var eLasers;
+var laserCollisionGroup;
 
-var barrack1;
-var barrack2;
-var barrack3;
-var barrack1Health = 15;
-var barrack2Health = 15;
-var barrack3Health = 15;
+var b;
+var barracks;
+var barrackCollisionGroup;
+var bSpacingX = 160;
+var bSpacingY = 380;
 
 var ufo;
 var invader1Info;
@@ -64,21 +64,32 @@ function preload() {
     game.load.image("laser", "media/spaceInvaders/laser.png");
     game.load.image("barracks", "media/spaceInvaders/barracks.png");
     game.load.image("heart", "media/spaceInvaders/heart.png");
+    game.load.spritesheet("boom", "media/spaceInvaders/boom.png", 38, 25);
+
+    game.load.physics("hitBox", "media/spaceInvaders/data/hitBoxData.json")
     //arrowkeys now work as input
     arrowKeys = game.input.keyboard.createCursorKeys();
 }
 
 function create() {
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.physics.startSystem(Phaser.Physics.P2JS);
+    game.physics.p2.defaultRestitution = 1;
+    game.physics.p2.setImpactEvents(true);
+
+    laserCollisionGroup = game.physics.p2.createCollisionGroup();
+    barrackCollisionGroup = game.physics.p2.createCollisionGroup();
+    game.physics.p2.updateBoundsCollisionGroup();
     //Creates player sprite
     player = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "player");
     player.anchor.setTo(0.5);
-    game.physics.enable(player, Phaser.Physics.ARCADE);
+    game.physics.p2.enable(player);
     player.body.collideWorldBounds = true;
+    player.body.fixedRotation = true;
+    player.body.setZeroDamping();
     //Create lasers
-    lasers = game.add.group();
+    /*lasers = game.add.group();
     lasers.enableBody = true;
-    lasers.physicsBodyType = Phaser.Physics.ARCADE;
+    game.physics.p2.enable(lasers);
     for (i = 0; i < 1; i++) {
         let l = lasers.create(0, 0, "laser");
         l.name = "laser" + i;
@@ -86,20 +97,20 @@ function create() {
         l.visible = false;
         l.checkWorldBounds = true;
         l.events.onOutOfBounds.add(resetLaser, this);
-    }
+    }*/
+
+    spawnBarracks();
+
+    laser = game.add.sprite(0, 0, "laser");
+    game.physics.p2.enable(laser);
+    laser.exists = false;
+    laser.visible = false;
+    laser.checkWorldBounds = true;
+    laser.body.collideWorldBounds = false;
+    laser.events.onOutOfBounds.add(resetLaser, this);
+    laser.body.setCollisionGroup(laserCollisionGroup);
     //Barracks/shelter
-    barrack1 = game.add.sprite(160, game.world.height - 100, "barracks");
-    barrack1.anchor.setTo(0.5);
-    barrack2 = game.add.sprite(game.world.width * 0.5, game.world.height - 100, "barracks");
-    barrack2.anchor.setTo(0.5);
-    barrack3 = game.add.sprite(562, game.world.height - 100, "barracks");
-    barrack3.anchor.setTo(0.5);
-    game.physics.enable(barrack1, Phaser.Physics.ARCADE);
-    game.physics.enable(barrack2, Phaser.Physics.ARCADE);
-    game.physics.enable(barrack3, Phaser.Physics.ARCADE);
-    barrack1.body.immovable = true;
-    barrack2.body.immovable = true;
-    barrack3.body.immovable = true;
+    laser.body.collides(barrackCollisionGroup, laserHitBarrack, this);
 
     spawnInvaders();
 
@@ -110,28 +121,48 @@ function create() {
 function update() {
     //If the game is running, check for arrowkey presses every update
     if (playing) {
+
         if (arrowKeys.right.isDown) {
-            player.x += 2.5;
-        }
-        if (arrowKeys.left.isDown) {
-            player.x += -2.5;
+            player.body.moveRight(200);
+        } else if (arrowKeys.left.isDown) {
+            player.body.moveLeft(200);
+        } else {
+            player.body.setZeroVelocity();
         }
         if (arrowKeys.up.isDown) {
             fire();
         }
     }
 
+    /*
     game.physics.arcade.collide(lasers, invaders1, laserHitInvader);
     game.physics.arcade.collide(lasers, invaders2, laserHitInvader);
     game.physics.arcade.collide(lasers, invaders3, laserHitInvader);
 
-    game.physics.arcade.collide(lasers, barrack1, laserHitBarrack);
-    game.physics.arcade.collide(lasers, barrack2, laserHitBarrack);
-    game.physics.arcade.collide(lasers, barrack3, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barrack1, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barrack2, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barrack3, laserHitBarrack);
+    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
+    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
+    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
+    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
+    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
+    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
+    */
+}
 
+function spawnBarracks() {
+    barracks = game.add.group();
+    barracks.physicsBodyType = Phaser.Physics.P2JS;
+    barracks.enableBody = true;
+    barracks.enableBodyDebug = true;
+
+    for(let i = 0; i < 3; i++){
+        b = barracks.create(bSpacingX, bSpacingY, "barracks");
+        b.name = "barrack" + i;
+        b.body.clearShapes();
+        b.body.loadPolygon("hitBox", "barracks");
+        b.body.immovable = true;
+        b.body.debug = true;
+        bSpacingX += 200;
+    };
 }
 
 function spawnInvaders() {
@@ -191,6 +222,7 @@ function spawnInvaders() {
             newInvader1 = game.add.sprite(invader1X, invader1Y, "invader1");
             game.physics.enable(newInvader1, Phaser.Physics.ARCADE);
             newInvader1.anchor.set(0.5);
+            newInvader1.animations.add("boom", [0, 1, 2, 3], 20);
             invaders1.add(newInvader1);
 
         }
@@ -230,38 +262,38 @@ function spawnUfo() {
 
 }
 
-function laserHitInvader(laser, invader){
+function laserHitInvader(laser, invader) {
     laser.kill();
     invader.kill();
-    if(invader.key == "invader2"){
+    if (invader.key == "invader2") {
         score += 10;
-    } else if(invader.key == "invader1"){
+    } else if (invader.key == "invader1") {
         score += 20;
-    } else if(invader.key == "invader3"){
+    } else if (invader.key == "invader3") {
         score += 40;
     }
     scoreText.setText("SCORE: " + score);
 }
 
 //TODO: Fix this bug... Barrack and Laser should switch places
-function laserHitBarrack(barrack, laser){
+function laserHitBarrack(barrack, laser) {
+    console.log("Hej")
     laser.kill();
-    if(barrack.key == "barrack1"){
+    if (barrack.key == "barrack1") {
         barrack1Health--;
-    } else if(barrack.key == "barrack2"){
+    } else if (barrack.key == "barrack2") {
         barrack2Health--;
-    } else if(barrack.key == "barrack3"){
+    } else if (barrack.key == "barrack3") {
         barrack3Health--;
     }
 }
 
 function fire() {
-        laser = lasers.getFirstExists(false);
-        if (laser) {
-            laser.reset(player.x - 1, player.y - 11);
-            laser.body.velocity.y = -400;
-        }
-    
+    if (!laser.exists) {
+        laser.reset(player.x, player.y - 7);
+        laser.body.velocity.y = -400;
+    }
+
 }
 
 function resetLaser(laser) {
