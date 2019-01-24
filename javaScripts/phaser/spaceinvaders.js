@@ -34,24 +34,64 @@ var bSpacingX = 160;
 var bSpacingY = 380;
 
 var ufo;
-var invader1Info;
-var invader2Info;
-var invader3Info;
+var invaders;
 var invaders1;
 var invaders2;
 var invaders3;
 var newInvader1;
 var newInvader2;
 var newInvader3;
-
-var playing = true;
-
 const ePadding = 10;
 const eWidth = 38;
 const eHeight = 24;
 const eRow = 11;
+const invader1Info = {
+    type: "invader1",
+    width: eWidth,
+    height: eHeight,
+    count: {
+        row: eRow,
+        col: 2
+    },
+    offset: {
+        top: 120,
+        left: 120
+    },
+    padding: ePadding
+}
+const invader2Info = {
+    type: "invader2",
+    width: eWidth,
+    height: eHeight,
+    count: {
+        row: eRow,
+        col: 2
+    },
+    offset: {
+        top: 190,
+        left: 120
+    },
+    padding: ePadding
+}
+const invader3Info = {
+    type: "invader3",
+    width: eWidth,
+    height: eHeight,
+    count: {
+        row: eRow,
+        col: 1
+    },
+    offset: {
+        top: 85,
+        left: 120
+    },
+    padding: ePadding
+}
+
+var playing = true;
 
 function preload() {
+    //Gameframe settings
     game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
@@ -69,21 +109,23 @@ function preload() {
     game.load.image("barrack4", "media/spaceInvaders/barrack4.png");
     game.load.image("heart", "media/spaceInvaders/heart.png");
     game.load.spritesheet("boom", "media/spaceInvaders/boom.png", 38, 25);
-
+    //Loads hitbox
     game.load.physics("hitBox", "media/spaceInvaders/data/hitBoxData.json")
     //arrowkeys now work as input
     arrowKeys = game.input.keyboard.createCursorKeys();
 }
 
 function create() {
+    //Starts the physics system
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.defaultRestitution = 1;
     game.physics.p2.setImpactEvents(true);
-
+    //Collisions
     laserCollisionGroup = game.physics.p2.createCollisionGroup();
     barrackCollisionGroup = game.physics.p2.createCollisionGroup();
+    enemyCollisionGroup = game.physics.p2.createCollisionGroup();
     game.physics.p2.updateBoundsCollisionGroup();
-    //Creates player sprite
+    //Creates player sprite with physics
     player = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "player");
     player.anchor.setTo(0.5);
     game.physics.p2.enable(player);
@@ -92,7 +134,7 @@ function create() {
     player.body.setZeroDamping();
 
     spawnBarracks();
-
+    //Creates the laser (reusable)
     laser = game.add.sprite(0, 0, "laser");
     game.physics.p2.enable(laser);
     laser.exists = false;
@@ -102,16 +144,19 @@ function create() {
     laser.body.collideWorldBounds = false;
     laser.body.fixedRotation = true;
     laser.body.setCollisionGroup(laserCollisionGroup);
-    laser.body.collides(barrackCollisionGroup);
+    laser.body.collides([barrackCollisionGroup, enemyCollisionGroup]);
 
-    spawnInvaders();
 
+    spawnInvaders(invader1Info);
+    spawnInvaders(invader2Info);
+    spawnInvaders(invader3Info);
+    //Text
     livesText = game.add.text(8, 0, "LIVES: ", textStyle);
     scoreText = game.add.text(game.world.width - 150, 0, "SCORE: " + score, textStyle);
 }
 
 function update() {
-    //If the game is running, check for arrowkey presses every update
+    //If the game is running, check for arrowkey presses every update cycle
     if (playing) {
 
         if (arrowKeys.right.isDown) {
@@ -128,9 +173,11 @@ function update() {
 }
 
 function spawnBarracks() {
+    //Creates group for barracks
     barracks = game.add.group();
     barracks.physicsBodyType = Phaser.Physics.P2JS;
     barracks.enableBody = true;
+    //Loop that spawns 3 barracks and gives the proper physics
     for (let i = 0; i < 3; i++) {
         b = barracks.create(bSpacingX, bSpacingY, "barrack1");
         b.name = "barrack" + i;
@@ -145,138 +192,73 @@ function spawnBarracks() {
     }
 }
 
-function spawnInvaders() {
-    //Invader info (self explainatory)
-    invader1Info = {
-        width: eWidth,
-        height: eHeight,
-        count: {
-            row: eRow,
-            col: 2
-        },
-        offset: {
-            top: 120,
-            left: 120
-        },
-        padding: ePadding
-    }
+function spawnInvaders(eType) {
+    invaders = game.add.group();
+    invaders.physicsBodyType = Phaser.Physics.P2JS;
+    invaders.enableBody = true;
 
-    invader2Info = {
-        width: eWidth,
-        height: eHeight,
-        count: {
-            row: eRow,
-            col: 2
-        },
-        offset: {
-            top: 190,
-            left: 120
-        },
-        padding: ePadding
-    }
+        for (c = 0; c < eType.count.col; c++) {
+            for (r = 0; r < eType.count.row; r++) {
+                var invaderX = (r * (eType.width + eType.padding)) + eType.offset.left;
+                var invaderY = (c * (eType.height + eType.padding)) + eType.offset.top;
 
-    invader3Info = {
-        width: eWidth,
-        height: eHeight,
-        count: {
-            row: eRow,
-            col: 1
-        },
-        offset: {
-            top: 85,
-            left: 120
-        },
-        padding: ePadding
-    }
-    //spawns the invaders
-    invaders1 = game.add.group();
-    invaders2 = game.add.group();
-    invaders3 = game.add.group();
-
-    for (c = 0; c < invader1Info.count.col; c++) {
-        for (r = 0; r < invader1Info.count.row; r++) {
-
-            var invader1X = (r * (invader1Info.width + invader1Info.padding)) + invader1Info.offset.left;
-            var invader1Y = (c * (invader1Info.height + invader1Info.padding)) + invader1Info.offset.top;
-
-            newInvader1 = game.add.sprite(invader1X, invader1Y, "invader1");
-            game.physics.enable(newInvader1, Phaser.Physics.ARCADE);
-            newInvader1.anchor.set(0.5);
-            newInvader1.animations.add("boom", [0, 1, 2, 3], 20);
-            invaders1.add(newInvader1);
-
+                e = invaders.create(invaderX, invaderY, eType.type);
+                e.name = eType.type + "_" + r;
+                e.body.setCollisionGroup(enemyCollisionGroup);
+                //e.body.debug = true;
+                e.body.collides(laserCollisionGroup, laserHitInvader, this);
+            }
         }
     }
-
-    for (c = 0; c < invader2Info.count.col; c++) {
-        for (r = 0; r < invader2Info.count.row; r++) {
-
-            var invader2X = (r * (invader2Info.width + invader2Info.padding)) + invader2Info.offset.left;
-            var invader2Y = (c * (invader2Info.height + invader2Info.padding)) + invader2Info.offset.top;
-
-            newInvader2 = game.add.sprite(invader2X, invader2Y, "invader2");
-            game.physics.enable(newInvader2, Phaser.Physics.ARCADE);
-            newInvader2.anchor.set(0.5);
-            invaders2.add(newInvader2);
-
-        }
-    }
-
-    for (c = 0; c < invader3Info.count.col; c++) {
-        for (r = 0; r < invader3Info.count.row; r++) {
-
-            var invader3X = (r * (invader3Info.width + invader3Info.padding)) + invader3Info.offset.left;
-            var invader3Y = (c * (invader3Info.height + invader3Info.padding)) + invader3Info.offset.top;
-
-            newInvader3 = game.add.sprite(invader3X, invader3Y, "invader3");
-            game.physics.enable(newInvader3, Phaser.Physics.ARCADE);
-            newInvader3.anchor.set(0.5);
-            invaders3.add(newInvader3);
-
-        }
-    }
-
-}
 
 function spawnUfo() {
 
 }
 
-function laserHitInvader(laser, invader) {
-    laser.kill();
-    invader.kill();
-    if (invader.key == "invader2") {
+function laserHitInvader(invader, laser) {
+    //Kills laser and invader
+    laser.sprite.kill();
+    invader.sprite.kill();
+    //If the laser has not already collided with the invader, change the bool and increase your score
+    if(!laserHit){
+        laserHit = true;
+    if (invader.sprite.key === "invader2") {
         score += 10;
-    } else if (invader.key == "invader1") {
+    } else if (invader.sprite.key === "invader1") {
         score += 20;
-    } else if (invader.key == "invader3") {
+    } else if (invader.sprite.key === "invader3") {
         score += 40;
     }
+}
     scoreText.setText("SCORE: " + score);
 }
 
 function laserHitBarrack(barrack, laser) {
+    //Kills the laser(allows it to be used again)
     laser.sprite.kill();
+    //If the laser has not already collided with the barrack, change the bool and damage the barrack
     if (!laserHit) {
         laserHit = true;
         barrackDmg(barrack.sprite);
     }
 }
 
-function barrackDmg(barrack){
+function barrackDmg(barrack) {
+    //Lowers barrack health and changes texture depending on HP levels. If 0 HP, kill the barrack
     barrack.health--;
-    if(barrack.health === 12){
+    if (barrack.health === 12) {
         barrack.loadTexture("barrack2");
-    } else if(barrack.health === 8){
+    } else if (barrack.health === 8) {
         barrack.loadTexture("barrack3");
-    } else if(barrack.health === 4){
+    } else if (barrack.health === 4) {
         barrack.loadTexture("barrack4")
-    } else if(barrack.health <= 0){
+    } else if (barrack.health <= 0) {
         barrack.kill();
     }
 }
 
 function fire() {
+    //If the laser has not been fired (exists), fire the laser
     if (!laser.exists) {
         laserHit = false;
         laser.reset(player.x, player.y - 7);
