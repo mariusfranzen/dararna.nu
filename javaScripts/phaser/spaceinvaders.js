@@ -25,6 +25,7 @@ var laserTime = 0;
 var lasers;
 var eLasers;
 var laserCollisionGroup;
+var laserHit = false;
 
 var b;
 var barracks;
@@ -62,7 +63,10 @@ function preload() {
     game.load.image("invader3", "media/spaceInvaders/invader3.png");
     game.load.image("ufo", "media/spaceInvaders/ufo.png");
     game.load.image("laser", "media/spaceInvaders/laser.png");
-    game.load.image("barracks", "media/spaceInvaders/barracks.png");
+    game.load.image("barrack1", "media/spaceInvaders/barrack1.png");
+    game.load.image("barrack2", "media/spaceInvaders/barrack2.png");
+    game.load.image("barrack3", "media/spaceInvaders/barrack3.png");
+    game.load.image("barrack4", "media/spaceInvaders/barrack4.png");
     game.load.image("heart", "media/spaceInvaders/heart.png");
     game.load.spritesheet("boom", "media/spaceInvaders/boom.png", 38, 25);
 
@@ -86,18 +90,6 @@ function create() {
     player.body.collideWorldBounds = true;
     player.body.fixedRotation = true;
     player.body.setZeroDamping();
-    //Create lasers
-    /*lasers = game.add.group();
-    lasers.enableBody = true;
-    game.physics.p2.enable(lasers);
-    for (i = 0; i < 1; i++) {
-        let l = lasers.create(0, 0, "laser");
-        l.name = "laser" + i;
-        l.exists = false;
-        l.visible = false;
-        l.checkWorldBounds = true;
-        l.events.onOutOfBounds.add(resetLaser, this);
-    }*/
 
     spawnBarracks();
 
@@ -106,11 +98,11 @@ function create() {
     laser.exists = false;
     laser.visible = false;
     laser.checkWorldBounds = true;
+    laser.outOfBoundsKill = true;
     laser.body.collideWorldBounds = false;
-    laser.events.onOutOfBounds.add(resetLaser, this);
+    laser.body.fixedRotation = true;
     laser.body.setCollisionGroup(laserCollisionGroup);
-    //Barracks/shelter
-    laser.body.collides(barrackCollisionGroup, laserHitBarrack, this);
+    laser.body.collides(barrackCollisionGroup);
 
     spawnInvaders();
 
@@ -133,36 +125,24 @@ function update() {
             fire();
         }
     }
-
-    /*
-    game.physics.arcade.collide(lasers, invaders1, laserHitInvader);
-    game.physics.arcade.collide(lasers, invaders2, laserHitInvader);
-    game.physics.arcade.collide(lasers, invaders3, laserHitInvader);
-
-    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
-    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
-    game.physics.arcade.collide(lasers, barracks, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
-    game.physics.arcade.collide(eLasers, barracks, laserHitBarrack);
-    */
 }
 
 function spawnBarracks() {
     barracks = game.add.group();
     barracks.physicsBodyType = Phaser.Physics.P2JS;
     barracks.enableBody = true;
-    barracks.enableBodyDebug = true;
-
-    for(let i = 0; i < 3; i++){
-        b = barracks.create(bSpacingX, bSpacingY, "barracks");
+    for (let i = 0; i < 3; i++) {
+        b = barracks.create(bSpacingX, bSpacingY, "barrack1");
         b.name = "barrack" + i;
+        b.health = 15;
         b.body.clearShapes();
         b.body.loadPolygon("hitBox", "barracks");
-        b.body.immovable = true;
-        b.body.debug = true;
+        b.body.static = true;
+        b.body.setCollisionGroup(barrackCollisionGroup);
+        //b.body.debug = true;
+        b.body.collides(laserCollisionGroup, laserHitBarrack, this);
         bSpacingX += 200;
-    };
+    }
 }
 
 function spawnInvaders() {
@@ -275,21 +255,30 @@ function laserHitInvader(laser, invader) {
     scoreText.setText("SCORE: " + score);
 }
 
-//TODO: Fix this bug... Barrack and Laser should switch places
 function laserHitBarrack(barrack, laser) {
-    console.log("Hej")
-    laser.kill();
-    if (barrack.key == "barrack1") {
-        barrack1Health--;
-    } else if (barrack.key == "barrack2") {
-        barrack2Health--;
-    } else if (barrack.key == "barrack3") {
-        barrack3Health--;
+    laser.sprite.kill();
+    if (!laserHit) {
+        laserHit = true;
+        barrackDmg(barrack.sprite);
+    }
+}
+
+function barrackDmg(barrack){
+    barrack.health--;
+    if(barrack.health === 12){
+        barrack.loadTexture("barrack2");
+    } else if(barrack.health === 8){
+        barrack.loadTexture("barrack3");
+    } else if(barrack.health === 4){
+        barrack.loadTexture("barrack4")
+    } else if(barrack.health <= 0){
+        barrack.kill();
     }
 }
 
 function fire() {
     if (!laser.exists) {
+        laserHit = false;
         laser.reset(player.x, player.y - 7);
         laser.body.velocity.y = -400;
     }
