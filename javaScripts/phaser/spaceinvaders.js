@@ -41,6 +41,9 @@ var invaders3;
 var newInvader1;
 var newInvader2;
 var newInvader3;
+var invaderX
+var invaderY
+var canMove = true;
 const ePadding = 10;
 const eWidth = 38;
 const eHeight = 24;
@@ -146,6 +149,9 @@ function create() {
     laser.body.setCollisionGroup(laserCollisionGroup);
     laser.body.collides([barrackCollisionGroup, enemyCollisionGroup]);
 
+    invaders = game.add.group();
+    invaders.physicsBodyType = Phaser.Physics.P2JS;
+    invaders.enableBody = true;
 
     spawnInvaders(invader1Info);
     spawnInvaders(invader2Info);
@@ -158,7 +164,6 @@ function create() {
 function update() {
     //If the game is running, check for arrowkey presses every update cycle
     if (playing) {
-
         if (arrowKeys.right.isDown) {
             player.body.moveRight(200);
         } else if (arrowKeys.left.isDown) {
@@ -193,23 +198,38 @@ function spawnBarracks() {
 }
 
 function spawnInvaders(eType) {
-    invaders = game.add.group();
-    invaders.physicsBodyType = Phaser.Physics.P2JS;
-    invaders.enableBody = true;
+    for (c = 0; c < eType.count.col; c++) {
+        for (r = 0; r < eType.count.row; r++) {
+            invaderX = (r * (eType.width + eType.padding)) + eType.offset.left;
+            invaderY = (c * (eType.height + eType.padding)) + eType.offset.top;
 
-        for (c = 0; c < eType.count.col; c++) {
-            for (r = 0; r < eType.count.row; r++) {
-                var invaderX = (r * (eType.width + eType.padding)) + eType.offset.left;
-                var invaderY = (c * (eType.height + eType.padding)) + eType.offset.top;
-
-                e = invaders.create(invaderX, invaderY, eType.type);
-                e.name = eType.type + "_" + r;
-                e.body.setCollisionGroup(enemyCollisionGroup);
-                //e.body.debug = true;
-                e.body.collides(laserCollisionGroup, laserHitInvader, this);
-            }
+            e = invaders.create(invaderX, invaderY, eType.type);
+            //Name = invaderType_row_column, eg. invader1_5_1
+            e.name = eType.type + "_" + r + "_" + c;
+            e.body.setCollisionGroup(enemyCollisionGroup);
+            //e.body.debug = true;
+            e.body.collides(laserCollisionGroup, laserHitInvader, this);
         }
     }
+}
+
+//NOT FUNCTIONAL
+function moveInvaders() {
+    for(let i = 0; i < invaders.children.length; i++){
+        if(invaders.children[i].world.x <= 20){
+            canMove = false;
+            invaders.children[i].reset(invaders.children[i].position.x, invaders.children[i].position.y + 20);
+        } else if (invaders.children[i].world.x >= 720){
+            canMove = true;
+            invaders.children[i].reset(invaders.children[i].position.x, invaders.children[i].position.y + 20);
+        }
+        if(canMove){
+            invaders.children[i].reset(invaders.children[i].position.x - 20, invaders.children[i].position.y);
+        } else {
+            invaders.children[i].reset(invaders.children[i].position.x + 20, invaders.children[i].position.y);
+        }
+    }
+}
 
 function spawnUfo() {
 
@@ -220,16 +240,16 @@ function laserHitInvader(invader, laser) {
     laser.sprite.kill();
     invader.sprite.kill();
     //If the laser has not already collided with the invader, change the bool and increase your score
-    if(!laserHit){
+    if (!laserHit) {
         laserHit = true;
-    if (invader.sprite.key === "invader2") {
-        score += 10;
-    } else if (invader.sprite.key === "invader1") {
-        score += 20;
-    } else if (invader.sprite.key === "invader3") {
-        score += 40;
+        if (invader.sprite.key === "invader2") {
+            score += 10;
+        } else if (invader.sprite.key === "invader1") {
+            score += 20;
+        } else if (invader.sprite.key === "invader3") {
+            score += 40;
+        }
     }
-}
     scoreText.setText("SCORE: " + score);
 }
 
