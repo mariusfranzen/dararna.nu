@@ -41,9 +41,11 @@ var invaders3;
 var newInvader1;
 var newInvader2;
 var newInvader3;
-var invaderX
-var invaderY
-var canMove = true;
+var invaderX;
+var invaderY;
+var eMoveLeft = true;
+var eMoveRight = false;
+var moveTimer;
 const ePadding = 10;
 const eWidth = 38;
 const eHeight = 24;
@@ -159,6 +161,10 @@ function create() {
     //Text
     livesText = game.add.text(8, 0, "LIVES: ", textStyle);
     scoreText = game.add.text(game.world.width - 150, 0, "SCORE: " + score, textStyle);
+
+    moveTimer = game.time.create(false);
+    moveTimer.add(3000, moveInvaders, this);
+    moveTimer.start();
 }
 
 function update() {
@@ -213,22 +219,29 @@ function spawnInvaders(eType) {
     }
 }
 
-//NOT FUNCTIONAL
 function moveInvaders() {
-    for(let i = 0; i < invaders.children.length; i++){
-        if(invaders.children[i].world.x <= 20){
-            canMove = false;
-            invaders.children[i].reset(invaders.children[i].position.x, invaders.children[i].position.y + 20);
-        } else if (invaders.children[i].world.x >= 720){
-            canMove = true;
-            invaders.children[i].reset(invaders.children[i].position.x, invaders.children[i].position.y + 20);
+    console.log(invaders.children.length);
+    for (i = 0; i < invaders.children.length; i++) {
+        if (invaders.children[i].x <= 20) {
+            eMoveLeft = false;
+            eMoveRight = true;
         }
-        if(canMove){
-            invaders.children[i].reset(invaders.children[i].position.x - 20, invaders.children[i].position.y);
-        } else {
-            invaders.children[i].reset(invaders.children[i].position.x + 20, invaders.children[i].position.y);
+        if (invaders.children[i].x >= 700){
+            eMoveLeft = true;
+            eMoveRight = false;
         }
     }
+
+    for (i = 0; i < invaders.children.length; i++) {
+        if (invaders.children[i].alive) {
+            if (eMoveLeft) {
+                invaders.children[i].reset(invaders.children[i].x - 20, invaders.children[i].y);
+            } else if (eMoveRight) {
+                invaders.children[i].reset(invaders.children[i].x + 20, invaders.children[i].y);
+            }
+        }
+    }
+    moveTimer.add(3000, moveInvaders, this);
 }
 
 function spawnUfo() {
