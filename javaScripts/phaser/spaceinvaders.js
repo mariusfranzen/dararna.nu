@@ -45,6 +45,7 @@ var invaderX;
 var invaderY;
 var eMoveLeft = true;
 var eMoveRight = false;
+var eMoveDown = false;
 var moveTimer;
 const ePadding = 10;
 const eWidth = 38;
@@ -203,6 +204,7 @@ function spawnBarracks() {
     }
 }
 
+//The eType properties are at the top with the variable declarations
 function spawnInvaders(eType) {
     for (c = 0; c < eType.count.col; c++) {
         for (r = 0; r < eType.count.row; r++) {
@@ -220,24 +222,33 @@ function spawnInvaders(eType) {
 }
 
 function moveInvaders() {
+    //Loop that checks all invaders x position to determine if the invaders should go left or right
+    //If they should change direction they move down a bit first
     for (i = 0; i < invaders.children.length; i++) {
         if (invaders.children[i].alive) {
             if (invaders.children[i].x <= 40) {
                 eMoveLeft = false;
                 eMoveRight = true;
-                moveInvadersDown();
+                eMoveDown = true;
             } else if (invaders.children[i].x >= 680) {
                 eMoveLeft = true;
                 eMoveRight = false;
-                moveInvadersDown();
-            } else {
-                moveInvadersSide();
+                eMoveDown = true;
             }
         }
     }
+
+    //Moves the invaders down or to the side depending on what the for loop above does
+    if (eMoveDown) {
+        moveInvadersDown();
+        eMoveDown = false;
+    } else {
+        moveInvadersSide();
+    }
 }
 
-function moveInvadersSide(){
+function moveInvadersSide() {
+    //Loops through all invaders and moves them 20px to either the left or right
     for (i = 0; i < invaders.children.length; i++) {
         if (eMoveLeft) {
             if (invaders.children[i].alive) {
@@ -250,15 +261,18 @@ function moveInvadersSide(){
         }
 
     }
+    //Runs the moveInvaders function after 1000 ms
     moveTimer.add(1000, moveInvaders, this);
 }
 
-function moveInvadersDown(){
-    for(i = 0; i < invaders.children.length; i++){
-        if(invaders.children[i].alive){
+function moveInvadersDown() {
+    //Loops through all invaders and moves them down
+    for (i = 0; i < invaders.children.length; i++) {
+        if (invaders.children[i].alive) {
             invaders.children[i].reset(invaders.children[i].x, invaders.children[i].y + 20);
         }
     }
+    //Runs moveInvadersSide after 1000 ms
     moveTimer.add(1000, moveInvadersSide, this);
 }
 
