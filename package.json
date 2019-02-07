@@ -1,0 +1,22 @@
+{
+  "name": "dararna.nu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mariusfranzen/dararna.nu.git"
+  },
+  "author": "Marius Franzén",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mariusfranzen/dararna.nu/issues"
+  },
+  "homepage": "https://github.com/mariusfranzen/dararna.nu#readme",
+  "dependencies": {
+    "mysql": "^2.16.0"
+  }
+}

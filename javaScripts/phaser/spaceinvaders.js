@@ -41,6 +41,7 @@ var invaders3;
 var newInvader1;
 var newInvader2;
 var newInvader3;
+var boom;
 var invaderX;
 var invaderY;
 var eMoveLeft = true;
@@ -212,6 +213,7 @@ function spawnInvaders(eType) {
             invaderY = (c * (eType.height + eType.padding)) + eType.offset.top;
 
             e = invaders.create(invaderX, invaderY, eType.type);
+            boom = e.animations.add("boom");
             //Name = invaderType_row_column, eg. invader1_5_1
             e.name = eType.type + "_" + r + "_" + c;
             e.body.setCollisionGroup(enemyCollisionGroup);
@@ -284,6 +286,7 @@ function laserHitInvader(invader, laser) {
     //Kills laser and invader
     laser.sprite.kill();
     invader.sprite.kill();
+    invader.sprite.animations.play("boom", 30, true);
     //If the laser has not already collided with the invader, change the bool and increase your score
     if (!laserHit) {
         laserHit = true;
