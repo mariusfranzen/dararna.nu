@@ -8,15 +8,17 @@
     <title>Space Invaders</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser-ce/2.11.1/phaser.js"></script>
-    <script src="javaScripts/Untitled-1.js"></script>
     <link rel="stylesheet" href="gameStylesheet.css">
     <link rel="icon" href="media/favicon.ico">
 </head>
 
 <body>
+    <p id="test">HEJ</p>
 
     <img id="backgroundImage" src="media/video-game-game-over-retro-arcade-screen-blue-look_nq3udezax__F0000.png" alt="">
+    
     <script src="javaScripts/phaser/spaceinvaders.js"></script>
+    
 
 </body>
 

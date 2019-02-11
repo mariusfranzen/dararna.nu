@@ -2,6 +2,7 @@
  * SPACEINVADERS made by Marius Franzén using Phaser - marius.franzen1@gmail.com
  */
 
+ "use strict";
 var game = new Phaser.Game(720, 480, Phaser.CANVAS, "spaceinvaders", {
     preload: preload,
     create: create,
@@ -11,7 +12,8 @@ var game = new Phaser.Game(720, 480, Phaser.CANVAS, "spaceinvaders", {
 var player;
 var arrowKeys;
 var lives = 3;
-var score = 0;
+var score = 1000;
+var username = "default";
 
 var livesText;
 var scoreText;
@@ -41,6 +43,7 @@ var invaders3;
 var newInvader1;
 var newInvader2;
 var newInvader3;
+var enemyCollisionGroup;
 var boom;
 var invaderX;
 var invaderY;
@@ -165,8 +168,10 @@ function create() {
     scoreText = game.add.text(game.world.width - 150, 0, "SCORE: " + score, textStyle);
 
     moveTimer = game.time.create(false);
-    moveTimer.add(1000, moveInvaders, this);
+    moveTimer.add(3000, moveInvaders, this);
     moveTimer.start();
+
+    //uploadScore();
 }
 
 function update() {
@@ -207,12 +212,12 @@ function spawnBarracks() {
 
 //The eType properties are at the top with the variable declarations
 function spawnInvaders(eType) {
-    for (c = 0; c < eType.count.col; c++) {
-        for (r = 0; r < eType.count.row; r++) {
+    for (let c = 0; c < eType.count.col; c++) {
+        for (let r = 0; r < eType.count.row; r++) {
             invaderX = (r * (eType.width + eType.padding)) + eType.offset.left;
             invaderY = (c * (eType.height + eType.padding)) + eType.offset.top;
 
-            e = invaders.create(invaderX, invaderY, eType.type);
+            var e = invaders.create(invaderX, invaderY, eType.type);
             boom = e.animations.add("boom");
             //Name = invaderType_row_column, eg. invader1_5_1
             e.name = eType.type + "_" + r + "_" + c;
@@ -226,7 +231,7 @@ function spawnInvaders(eType) {
 function moveInvaders() {
     //Loop that checks all invaders x position to determine if the invaders should go left or right
     //If they should change direction they move down a bit first
-    for (i = 0; i < invaders.children.length; i++) {
+    for (let i = 0; i < invaders.children.length; i++) {
         if (invaders.children[i].alive) {
             if (invaders.children[i].x <= 40) {
                 eMoveLeft = false;
@@ -251,7 +256,7 @@ function moveInvaders() {
 
 function moveInvadersSide() {
     //Loops through all invaders and moves them 20px to either the left or right
-    for (i = 0; i < invaders.children.length; i++) {
+    for (let i = 0; i < invaders.children.length; i++) {
         if (eMoveLeft) {
             if (invaders.children[i].alive) {
                 invaders.children[i].reset(invaders.children[i].x - 20, invaders.children[i].y);
@@ -264,18 +269,18 @@ function moveInvadersSide() {
 
     }
     //Runs the moveInvaders function after 1000 ms
-    moveTimer.add(1000, moveInvaders, this);
+    moveTimer.add(3000, moveInvaders, this);
 }
 
 function moveInvadersDown() {
     //Loops through all invaders and moves them down
-    for (i = 0; i < invaders.children.length; i++) {
+    for (let i = 0; i < invaders.children.length; i++) {
         if (invaders.children[i].alive) {
             invaders.children[i].reset(invaders.children[i].x, invaders.children[i].y + 20);
         }
     }
     //Runs moveInvadersSide after 1000 ms
-    moveTimer.add(1000, moveInvadersSide, this);
+    moveTimer.add(3000, moveInvadersSide, this);
 }
 
 function spawnUfo() {
@@ -337,4 +342,19 @@ function fire() {
 
 function resetLaser(laser) {
     laser.kill();
+}
+
+//TODO: Parse username and score to a json which can be read by php in spaceinvaders.php
+function uploadScore() {
+    
+    var myObj = {username: username, score: score};
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function(){
+        if(this.readyState == 4 && this.status == 200){
+            document.getElementById("test").innerHTML = this.responseText;
+        }
+    }
+    request.open("GET", "uploadscore.php?user=" + username + "&score=" + score);
+    request.setRequestHeader("Content-type", "application/json");
+    request.send(JSON.stringify(myObj));
 }
