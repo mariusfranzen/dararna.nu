@@ -21,11 +21,13 @@ var pauseText;
 var startButton;
 var highscoreButton;
 var highscoreText;
+var creditsText;
 var creditsButton;
 var returnButton;
 var textStyle = {
     font: "12px Pixeled",
-    fill: "#FFFFFF"
+    fill: "#FFFFFF",
+    align: "center"
 };
 
 var laser;
@@ -416,7 +418,23 @@ function highscoreMenu() {
 }
 
 function creditsMenu() {
+    startButton.visible = false;
+    highscoreButton.visible = false;
+    creditsButton.visible = false;
 
+    creditsText = game.add.text(game.world.width/2, 230, "LEAD PROGRAMMER: MARIUS FRANZÉN\nLEAD DESIGNER: MARIUS FRANZÉN\nLEAD PRODUCER: MARIUS FRANZÉN\nLEAD DIRECTOR: MARIUS FRANZÉN", textStyle);
+    creditsText.anchor.setTo(0.5);
+
+    returnButton = game.add.text(game.world.width/2, 350, "RETURN", textStyle);
+    returnButton.anchor.setTo(0.5);
+    returnButton.inputEnabled = true;
+    returnButton.events.onInputUp.add(function(){
+        startButton.visible = true;
+        highscoreButton.visible = true;
+        creditsButton.visible = true;
+        creditsText.visible = false;
+        returnButton.visible = false;
+    });
 }
 
 function uploadScore() {
