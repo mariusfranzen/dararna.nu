@@ -14,8 +14,8 @@
         $score = $_REQUEST["score"];
 
         $servername = "localhost";
-        $username = "root";
-        $password = "";
+        $username = "scoreuploadndownload";
+        $password = "Alligator3";
         $dbname = "leaderboard";
 
         $conn = new mysqli($servername, $username, $password, $dbname);
@@ -30,10 +30,6 @@
         } else {
             echo "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
-
-        echo "<br>Connected successfully";
-
-        
 
         mysqli_close($conn);
 

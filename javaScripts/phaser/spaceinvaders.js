@@ -2,7 +2,7 @@
  * SPACEINVADERS made by Marius Franzén using Phaser - marius.franzen1@gmail.com
  */
 
- "use strict";
+"use strict";
 var game = new Phaser.Game(720, 480, Phaser.CANVAS, "spaceinvaders", {
     preload: preload,
     create: create,
@@ -12,11 +12,17 @@ var game = new Phaser.Game(720, 480, Phaser.CANVAS, "spaceinvaders", {
 var player;
 var arrowKeys;
 var lives = 3;
-var score = 1000;
-var username = "default";
+var score = 0;
+var username = "hugs4drugs";
 
 var livesText;
 var scoreText;
+var pauseText;
+var startButton;
+var highscoreButton;
+var highscoreText;
+var creditsButton;
+var returnButton;
 var textStyle = {
     font: "12px Pixeled",
     fill: "#FFFFFF"
@@ -166,27 +172,32 @@ function create() {
     //Text
     livesText = game.add.text(8, 0, "LIVES: ", textStyle);
     scoreText = game.add.text(game.world.width - 150, 0, "SCORE: " + score, textStyle);
+    //Pause menu
+    pauseText = game.add.text(game.world.width / 2, 0, "PAUSE", textStyle);
+    pauseText.anchor.setTo(0.5, 0);
+    pauseText.inputEnabled = true;
+    pauseText.events.onInputUp.add(pauseMenu);
 
     moveTimer = game.time.create(false);
     moveTimer.add(3000, moveInvaders, this);
     moveTimer.start();
 
+    pauseMenu();
     //uploadScore();
 }
 
 function update() {
     //If the game is running, check for arrowkey presses every update cycle
-    if (playing) {
-        if (arrowKeys.right.isDown) {
-            player.body.moveRight(200);
-        } else if (arrowKeys.left.isDown) {
-            player.body.moveLeft(200);
-        } else {
-            player.body.setZeroVelocity();
-        }
-        if (arrowKeys.up.isDown) {
-            fire();
-        }
+
+    if (arrowKeys.right.isDown) {
+        player.body.moveRight(200);
+    } else if (arrowKeys.left.isDown) {
+        player.body.moveLeft(200);
+    } else {
+        player.body.setZeroVelocity();
+    }
+    if (arrowKeys.up.isDown) {
+        fire();
     }
 }
 
@@ -344,17 +355,91 @@ function resetLaser(laser) {
     laser.kill();
 }
 
-//TODO: Parse username and score to a json which can be read by php in spaceinvaders.php
+function pauseMenu() {
+    if (!game.paused) {
+        player.visible = false;
+        barracks.visible = false;
+        invaders.visible = false;
+
+        startButton = game.add.text(game.world.width / 2, 190, "START GAME", textStyle);
+        startButton.inputEnabled = true;
+        startButton.anchor.setTo(0.5);
+        startButton.events.onInputUp.add(startGame);
+
+        highscoreButton = game.add.text(game.world.width / 2, 225, "HIGHSCORES", textStyle);
+        highscoreButton.inputEnabled = true;
+        highscoreButton.anchor.setTo(0.5);
+        highscoreButton.events.onInputUp.add(highscoreMenu);
+
+        creditsButton = game.add.text(game.world.width / 2, 260, "CREDITS", textStyle);
+        creditsButton.inputEnabled = true;
+        creditsButton.anchor.setTo(0.5);
+        creditsButton.events.onInputUp.add(creditsMenu);
+
+        startButton.visible = true;
+        highscoreButton.visible = true;
+        creditsButton.visible = true;
+
+        game.paused = true;
+    }
+}
+
+function startGame() {
+    game.paused = false;
+
+    player.visible = true;
+    barracks.visible = true;
+    invaders.visible = true;
+
+    startButton.visible = false;
+    highscoreButton.visible = false;
+    creditsButton.visible = false;
+}
+
+function highscoreMenu() {
+    startButton.visible = false;
+    highscoreButton.visible = false;
+    creditsButton.visible = false;
+
+    returnButton = game.add.text(game.world.width/2, 350, "RETURN", textStyle);
+    returnButton.anchor.setTo(0.5);
+    returnButton.inputEnabled = true;
+    returnButton.events.onInputUp.add(function(){
+        startButton.visible = true;
+        highscoreButton.visible = true;
+        creditsButton.visible = true;
+        highscoreText.visible = false;
+        returnButton.visible = false;
+    });
+
+    getScore();
+}
+
+function creditsMenu() {
+
+}
+
 function uploadScore() {
-    
-    var myObj = {username: username, score: score};
     var request = new XMLHttpRequest();
-    request.onreadystatechange = function(){
-        if(this.readyState == 4 && this.status == 200){
+    request.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
             document.getElementById("test").innerHTML = this.responseText;
         }
     }
     request.open("GET", "uploadscore.php?user=" + username + "&score=" + score);
     request.setRequestHeader("Content-type", "application/json");
-    request.send(JSON.stringify(myObj));
+    request.send();
+}
+
+function getScore() {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            highscoreText = game.add.text(game.world.width / 2, 250, this.responseText.toUpperCase(), textStyle);
+            highscoreText.anchor.setTo(0.5);
+        }
+    }
+    request.open("GET", "getscore.php");
+    request.setRequestHeader("Content-type", "application/json");
+    request.send()
 }

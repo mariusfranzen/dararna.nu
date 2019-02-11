@@ -13,13 +13,9 @@
 </head>
 
 <body>
-    <p id="test">HEJ</p>
-
+    <input type="hidden" id="testa">
     <img id="backgroundImage" src="media/video-game-game-over-retro-arcade-screen-blue-look_nq3udezax__F0000.png" alt="">
-    
     <script src="javaScripts/phaser/spaceinvaders.js"></script>
-    
-
 </body>
 
 </html>
