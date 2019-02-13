@@ -10,12 +10,19 @@ var game = new Phaser.Game(720, 480, Phaser.CANVAS, "spaceinvaders", {
 });
 
 var player;
+var playerCollisionGroup;
 var arrowKeys;
 var lives = 3;
+var heart1;
+var heart2;
+var heart3;
 var score = 0;
 var username = "hugs4drugs";
 
 var livesText;
+var livesLostText;
+var gameOverText;
+var gotoLeaderBoardText;
 var scoreText;
 var pauseText;
 var startButton;
@@ -33,6 +40,7 @@ var textStyle = {
 var laser;
 var laserTime = 0;
 var lasers;
+var eL;
 var eLasers;
 var laserCollisionGroup;
 var laserHit = false;
@@ -59,6 +67,7 @@ var eMoveLeft = true;
 var eMoveRight = false;
 var eMoveDown = false;
 var moveTimer;
+var eShootTimer;
 const ePadding = 10;
 const eWidth = 38;
 const eHeight = 24;
@@ -69,10 +78,10 @@ const invader1Info = {
     height: eHeight,
     count: {
         row: eRow,
-        col: 2
+        col: 1
     },
     offset: {
-        top: 120,
+        top: 85,
         left: 120
     },
     padding: ePadding
@@ -86,7 +95,7 @@ const invader2Info = {
         col: 2
     },
     offset: {
-        top: 190,
+        top: 120,
         left: 120
     },
     padding: ePadding
@@ -97,16 +106,14 @@ const invader3Info = {
     height: eHeight,
     count: {
         row: eRow,
-        col: 1
+        col: 2
     },
     offset: {
-        top: 85,
+        top: 190,
         left: 120
     },
     padding: ePadding
 }
-
-var playing = true;
 
 function preload() {
     //Gameframe settings
@@ -142,6 +149,7 @@ function create() {
     laserCollisionGroup = game.physics.p2.createCollisionGroup();
     barrackCollisionGroup = game.physics.p2.createCollisionGroup();
     enemyCollisionGroup = game.physics.p2.createCollisionGroup();
+    playerCollisionGroup = game.physics.p2.createCollisionGroup();
     game.physics.p2.updateBoundsCollisionGroup();
     //Creates player sprite with physics
     player = game.add.sprite(game.world.width * 0.5, game.world.height - 25, "player");
@@ -150,6 +158,8 @@ function create() {
     player.body.collideWorldBounds = true;
     player.body.fixedRotation = true;
     player.body.setZeroDamping();
+    player.body.setCollisionGroup(playerCollisionGroup);
+    player.body.collides(laserCollisionGroup, laserHitPlayer, this);
 
     spawnBarracks();
     //Creates the laser (reusable)
@@ -164,6 +174,22 @@ function create() {
     laser.body.setCollisionGroup(laserCollisionGroup);
     laser.body.collides([barrackCollisionGroup, enemyCollisionGroup]);
 
+    eLasers = game.add.group();
+    eLasers.physicsBodyType = Phaser.Physics.P2JS;
+    eLasers.enableBody = true;
+    for (let i = 0; i < 22; i++) {
+        eL = eLasers.create(0, 0, "laser");
+        eL.exists = false;
+        eL.visible = false;
+        eL.name = "eLaser_" + i;
+        eL.checkWorldBounds = true;
+        eL.body.outOfBoundsKill = true;
+        eL.body.collideWorldBounds = false;
+        eL.body.fixedRotation = true;
+        eL.body.setCollisionGroup(laserCollisionGroup);
+        eL.body.collides([barrackCollisionGroup, playerCollisionGroup]);
+    }
+    console.log(eLasers);
     invaders = game.add.group();
     invaders.physicsBodyType = Phaser.Physics.P2JS;
     invaders.enableBody = true;
@@ -174,6 +200,9 @@ function create() {
     //Text
     livesText = game.add.text(8, 0, "LIVES: ", textStyle);
     scoreText = game.add.text(game.world.width - 150, 0, "SCORE: " + score, textStyle);
+    heart1 = game.add.image(74, 2, "heart");
+    heart2 = game.add.image(104, 2, "heart");
+    heart3 = game.add.image(134, 2, "heart");
     //Pause menu
     pauseText = game.add.text(game.world.width / 2, 0, "PAUSE", textStyle);
     pauseText.anchor.setTo(0.5, 0);
@@ -184,6 +213,9 @@ function create() {
     moveTimer.add(3000, moveInvaders, this);
     moveTimer.start();
 
+    eShootTimer = game.time.create(false);
+    eShootTimer.add(2000, eFire, this);
+    eShootTimer.start();
     pauseMenu();
     //uploadScore();
 }
@@ -200,6 +232,10 @@ function update() {
     }
     if (arrowKeys.up.isDown) {
         fire();
+    }
+    invaderShootCheck();
+    if (lives <= 0) {
+        gameOverScreen();
     }
 }
 
@@ -300,6 +336,21 @@ function spawnUfo() {
 
 }
 
+function laserHitPlayer(player, laser) {
+    laser.sprite.kill();
+    for(let i = 0; i < eLasers.children.length; i++){
+    eLasers.children[i].kill();
+}
+    player.sprite.kill();
+    if (!laser.hasCollided) {
+        laser.hasCollided = true;
+        lives--;
+        if (lives > 0) {
+            livesLostScreen();
+        }
+    }
+}
+
 function laserHitInvader(invader, laser) {
     //Kills laser and invader
     laser.sprite.kill();
@@ -322,9 +373,7 @@ function laserHitInvader(invader, laser) {
 function laserHitBarrack(barrack, laser) {
     //Kills the laser(allows it to be used again)
     laser.sprite.kill();
-    //If the laser has not already collided with the barrack, change the bool and damage the barrack
-    if (!laserHit) {
-        laserHit = true;
+    if (!laser.hasCollided) {
         barrackDmg(barrack.sprite);
     }
 }
@@ -350,11 +399,48 @@ function fire() {
         laser.reset(player.x, player.y - 7);
         laser.body.velocity.y = -400;
     }
+}
 
+function eFire() {
+    for (let i = 0; i < invaders.children.length; i++) {
+        if (invaders.children[i].canShoot && Math.random() < 0.5 && invaders.children[i].alive) {
+            eLasers.children[invaders.children[i].bullet].reset(invaders.children[i].x, invaders.children[i].y + 7);
+            eLasers.children[invaders.children[i].bullet].body.velocity.y = 400;
+            eLasers.children[invaders.children[i].bullet].body.hasCollided = false;
+        }
+    }
+    eShootTimer.add(2000, eFire, this);
 }
 
 function resetLaser(laser) {
     laser.kill();
+}
+
+//Loop through all invaders. There's a 50/50 chance of an invader shooting if there are no invaders underneath it.
+//Check if there are invaders underneath it using a for loop and checking if the invader 11 position beside it (underneath)..
+//.. is alive. If it is alive, it cant shoot, else, it can shoot
+function invaderShootCheck() {
+    var j = 0;
+    for (let i = 0; i < invaders.children.length; i++) {
+        if (invaders.children[i].alive) {
+            var iIncrement = i + 11;
+            if (iIncrement >= 55) {
+                iIncrement = i;
+            }
+            if (invaders.children[iIncrement].alive && i !== iIncrement) {
+                invaders.children[i].canShoot = false;
+                invaders.children[i].bullet = null;
+            } else {
+                invaders.children[i].bullet = j;
+                invaders.children[i].canShoot = true;
+                if (j < 11) {
+                    j++
+                } else {
+                    j = 0;
+                }
+            }
+        }
+    }
 }
 
 function pauseMenu() {
@@ -371,7 +457,9 @@ function pauseMenu() {
         highscoreButton = game.add.text(game.world.width / 2, 225, "HIGHSCORES", textStyle);
         highscoreButton.inputEnabled = true;
         highscoreButton.anchor.setTo(0.5);
-        highscoreButton.events.onInputUp.add(highscoreMenu);
+        highscoreButton.events.onInputUp.add(function(){
+            highscoreMenu(false)
+        });
 
         creditsButton = game.add.text(game.world.width / 2, 260, "CREDITS", textStyle);
         creditsButton.inputEnabled = true;
@@ -398,15 +486,21 @@ function startGame() {
     creditsButton.visible = false;
 }
 
-function highscoreMenu() {
+function highscoreMenu(gameOver) {
     startButton.visible = false;
     highscoreButton.visible = false;
     creditsButton.visible = false;
-
-    returnButton = game.add.text(game.world.width/2, 350, "RETURN", textStyle);
+    if(gameOver){
+        gameOverText.visible = false;
+        gotoLeaderBoardText.visible = false;
+    }
+    returnButton = game.add.text(game.world.width / 2, 350, "RETURN", textStyle);
     returnButton.anchor.setTo(0.5);
     returnButton.inputEnabled = true;
-    returnButton.events.onInputUp.add(function(){
+    returnButton.events.onInputUp.add(function () {
+        if(gameOver){
+            location.reload();
+        }
         startButton.visible = true;
         highscoreButton.visible = true;
         creditsButton.visible = true;
@@ -422,19 +516,49 @@ function creditsMenu() {
     highscoreButton.visible = false;
     creditsButton.visible = false;
 
-    creditsText = game.add.text(game.world.width/2, 230, "LEAD PROGRAMMER: MARIUS FRANZÉN\nLEAD DESIGNER: MARIUS FRANZÉN\nLEAD PRODUCER: MARIUS FRANZÉN\nLEAD DIRECTOR: MARIUS FRANZÉN", textStyle);
+    creditsText = game.add.text(game.world.width / 2, 230, "LEAD PROGRAMMER: MARIUS FRANZÉN\nLEAD DESIGNER: MARIUS FRANZÉN\nLEAD PRODUCER: MARIUS FRANZÉN\nLEAD DIRECTOR: MARIUS FRANZÉN", textStyle);
     creditsText.anchor.setTo(0.5);
 
-    returnButton = game.add.text(game.world.width/2, 350, "RETURN", textStyle);
+    returnButton = game.add.text(game.world.width / 2, 350, "RETURN", textStyle);
     returnButton.anchor.setTo(0.5);
     returnButton.inputEnabled = true;
-    returnButton.events.onInputUp.add(function(){
+    returnButton.events.onInputUp.add(function () {
         startButton.visible = true;
         highscoreButton.visible = true;
         creditsButton.visible = true;
         creditsText.visible = false;
         returnButton.visible = false;
     });
+}
+
+function livesLostScreen() {
+    game.paused = true;
+    livesLostText = game.add.text(game.world.width / 2, 230, "LIFE LOST. CLICK HERE TO CONTINUE.", textStyle);
+    invaders.visible = false;
+    livesLostText.anchor.setTo(0.5);
+    livesLostText.inputEnabled = true;
+    livesLostText.events.onInputUp.add(function () {
+        livesLostText.visible = false;
+        invaders.visible = true;
+        game.paused = false;
+        player.reset(game.world.width * 0.5, game.world.height - 25);
+    })
+}
+
+function gameOverScreen(){
+    invaders.visible = false;
+    player.visible = false;
+    barracks.visible = false;
+    game.paused = true;
+
+    gameOverText = game.add.text(game.world.width / 2, 150, "GAME OVER!\nYOUR FINAL SCORE WAS: " + score, textStyle);
+    gameOverText.anchor.setTo(0.5);
+    gotoLeaderBoardText = game.add.text(game.world.width / 2, 200, "GO TO LEADERBOARD", textStyle);
+    gotoLeaderBoardText.anchor.setTo(0.5);
+    gotoLeaderBoardText.inputEnabled = true;
+    gotoLeaderBoardText.events.onInputUp.add(function(){
+        highscoreMenu(true);
+    })
 }
 
 function uploadScore() {
