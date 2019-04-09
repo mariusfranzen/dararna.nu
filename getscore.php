@@ -1,6 +1,27 @@
 <?php
 
-    $servername = "localhost";
+class MyDB extends SQLite3 {
+    function __construct() {
+        $this->open('scoreboard.db');
+    }
+}
+
+$db = new MyDB();
+if(!$db) {
+    echo $db->lastErrorMsg();
+} else {
+    $sql = "SELECT `gamertag`, `score` FROM `highscores` ORDER BY `highscores`.`score` DESC LIMIT 5";
+
+    $ret = $db->query($sql);
+    while($row = $ret->fetchArray(SQLITE3_ASSOC)) {
+        echo $row["gamertag"] . " : " . $row["score"] . "\n";
+    }
+}
+
+$db->close();
+
+
+/*$servername = "localhost";
     $username = "scoreuploadndownload";
     $password = "Alligator3";
     $dbname = "leaderboard";
@@ -21,6 +42,6 @@
         echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
 
-    mysqli_close($conn);
+    mysqli_close($conn);*/
     
 ?>

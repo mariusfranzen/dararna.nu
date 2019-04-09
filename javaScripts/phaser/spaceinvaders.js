@@ -17,8 +17,16 @@ var heart1;
 var heart2;
 var heart3;
 var score = 0;
-var username = "hugs4drugs";
+var username = [];
 
+var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '.', '!'];
+var letterX;
+var letterY;
+var alphabetStyle = {
+    font: "18px Pixeled",
+    fill: "#FFFFFF",
+    align: "center"
+}
 var livesText;
 var livesLostText;
 var gameOverText;
@@ -189,7 +197,6 @@ function create() {
         eL.body.setCollisionGroup(laserCollisionGroup);
         eL.body.collides([barrackCollisionGroup, playerCollisionGroup]);
     }
-    console.log(eLasers);
     invaders = game.add.group();
     invaders.physicsBodyType = Phaser.Physics.P2JS;
     invaders.enableBody = true;
@@ -217,7 +224,6 @@ function create() {
     eShootTimer.add(2000, eFire, this);
     eShootTimer.start();
     pauseMenu();
-    //uploadScore();
 }
 
 function update() {
@@ -268,8 +274,8 @@ function spawnInvaders(eType) {
 
             var e = invaders.create(invaderX, invaderY, eType.type);
             boom = e.animations.add("boom");
-            //Name = invaderType_row_column, eg. invader1_5_1
-            e.name = eType.type + "_" + r + "_" + c;
+            //Name = invaderType_row_column, eg. invader1_r5_c1
+            e.name = eType.type + "_r" + r + "_c" + c;
             e.body.setCollisionGroup(enemyCollisionGroup);
             //e.body.debug = true;
             e.body.collides(laserCollisionGroup, laserHitInvader, this);
@@ -417,7 +423,7 @@ function resetLaser(laser) {
 }
 
 //Loop through all invaders. There's a 50/50 chance of an invader shooting if there are no invaders underneath it.
-//Check if there are invaders underneath it using a for loop and checking if the invader 11 position beside it (underneath)..
+//Check if there are invaders underneath it using a for loop and checking if the invader 11 positions beside it (underneath)..
 //.. is alive. If it is alive, it cant shoot, else, it can shoot
 function invaderShootCheck() {
     var j = 0;
@@ -484,6 +490,8 @@ function startGame() {
     startButton.visible = false;
     highscoreButton.visible = false;
     creditsButton.visible = false;
+
+    gameOverScreen();
 }
 
 function highscoreMenu(gameOver) {
@@ -553,19 +561,43 @@ function gameOverScreen(){
 
     gameOverText = game.add.text(game.world.width / 2, 150, "GAME OVER!\nYOUR FINAL SCORE WAS: " + score, textStyle);
     gameOverText.anchor.setTo(0.5);
-    gotoLeaderBoardText = game.add.text(game.world.width / 2, 200, "GO TO LEADERBOARD", textStyle);
+    gotoLeaderBoardText = game.add.text(game.world.width / 2, 200, "SUBMIT SCORE TO LEADERBOARD", textStyle);
     gotoLeaderBoardText.anchor.setTo(0.5);
     gotoLeaderBoardText.inputEnabled = true;
     gotoLeaderBoardText.events.onInputUp.add(function(){
-        highscoreMenu(true);
+        submitScoreScreen();
     })
+}
+//WIP
+function submitScoreScreen() {
+    gameOverText.visible = false;
+    gotoLeaderBoardText.visible = false;
+
+    var i = 0;
+    for(let c = 0; c < 7; c++) {
+        for(let r = 0; r < 4; r++) {
+            letterX = (r * 30) + 320;
+            letterY = (c * 30) + 180;
+
+            var l = game.add.text(letterX, letterY, " " + alphabet[i].toUpperCase() + " ", alphabetStyle);
+            l.anchor.setTo(0.5);
+            l.num = i;
+            l.inputEnabled = true;
+            l.events.onInputUp.add(function(){
+                username.push(alphabet[l.num]);
+                console.log(alphabet[l.num]);
+            })
+            i++;
+        }
+    }
 }
 
 function uploadScore() {
     var request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("test").innerHTML = this.responseText;
+            highscoreText = game.add.text(game.world.width / 2, 250, this.responseText.toUpperCase(), textStyle);
+            highscoreText.anchor.setTo(0.5);
         }
     }
     request.open("GET", "uploadscore.php?user=" + username + "&score=" + score);
